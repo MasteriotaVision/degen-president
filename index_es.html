@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Presidente Degen — Prototipo</title>
+<style>
+:root{--bg:#111214;--card:#1b1c1f;--card2:#232427;--text:#f2f2f0;--muted:#9a9a94;--accent:#e0c34a;--good:#5dcaa5;--bad:#e0716c;--border:#33343a;}
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0;}
+.wrap{max-width:420px;margin:0 auto;padding:16px;}
+header{text-align:center;padding:12px 0 4px;}
+header h1{font-size:19px;margin:0 0 4px;font-weight:700;letter-spacing:0.5px;}
+header p{font-size:11px;color:var(--muted);margin:0;line-height:1.4;}
+.langbar{display:flex;justify-content:center;gap:8px;margin:10px 0 6px;}
+.langbar a{font-size:11px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:3px 10px;border-radius:999px;}
+.langbar a.active{color:var(--bg);background:var(--accent);border-color:var(--accent);}
+.profile{display:flex;align-items:center;gap:10px;margin:12px 0;}
+.avatar{width:44px;height:44px;border-radius:50%;background:#f0997b;position:relative;flex-shrink:0;}
+.avatar::before{content:"";position:absolute;top:-8px;left:-4px;right:-4px;height:20px;background:#fac775;border-radius:50% 50% 0 0;}
+.pname{font-size:14px;font-weight:600;}
+.pday{font-size:11px;color:var(--muted);}
+.streak{display:none;align-items:center;gap:4px;background:#3a2f14;color:var(--accent);font-size:11px;padding:4px 10px;border-radius:999px;margin-left:auto;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.stat{background:var(--card);border-radius:10px;padding:10px;text-align:center;transition:background 0.3s;}
+.stat .l{font-size:10px;color:var(--muted);}
+.stat .v{font-size:16px;font-weight:700;margin-top:2px;}
+.coinbox{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.coinrow{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:2px;}
+.coinprice{font-size:19px;font-weight:700;margin-bottom:4px;}
+canvas{width:100%;height:50px;display:block;}
+.card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;transition:transform 0.25s ease, opacity 0.25s ease;}
+.card .tag{font-size:10px;color:var(--muted);margin-bottom:6px;}
+.card p{font-size:14px;line-height:1.5;margin:0 0 12px;}
+.choice{display:block;width:100%;text-align:left;background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:8px;cursor:pointer;}
+.choice:hover{background:#26272b;}
+.choice span{float:right;font-size:11px;color:var(--muted);}
+.tweetbox{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;opacity:0;transition:opacity 0.3s;}
+.tweetbox .h{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.tweetbox p{font-size:13px;line-height:1.5;margin:0 0 8px;}
+.tweetbox .reply{border-top:1px solid var(--border);padding-top:8px;font-size:12px;color:var(--muted);font-style:italic;}
+footer{text-align:center;font-size:10px;color:var(--muted);margin-top:20px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>EL PRESIDENTE DEGEN</h1>
+<p>Personaje 100% ficticio. Sátira política. Ningún consejo, ninguna realidad.</p>
+</header>
+<div class="langbar">
+<a href="index_fr.html">FR</a>
+<a href="index_en.html">EN</a>
+<a href="index_es.html" class="active">ES</a>
+</div>
+<div class="profile">
+<div class="avatar"></div>
+<div><div class="pname">El presidente</div><div class="pday">Día <span id="day">1</span></div></div>
+<div class="streak" id="streakbadge">🔥 <span id="streakval">0</span></div>
+</div>
+<div class="stats">
+<div class="stat" id="card-approval"><div class="l">Popularidad</div><div class="v" id="approval">54%</div></div>
+<div class="stat" id="card-wealth"><div class="l">Fortuna</div><div class="v" id="wealth">$2.4M</div></div>
+<div class="stat" id="card-risk"><div class="l">Riesgo SEC</div><div class="v" id="risk">12%</div></div>
+</div>
+<div class="coinbox">
+<div class="coinrow"><span>$FREEDOM</span><span id="coinchange">+0%</span></div>
+<div class="coinprice" id="coinprice">$0.014</div>
+<canvas id="chart"></canvas>
+</div>
+<div class="card" id="deccard">
+<div class="tag">Decisión <span id="decnum">1</span>/25</div>
+<p id="detext">Cargando...</p>
+<button class="choice" id="choiceA"></button>
+<button class="choice" id="choiceB"></button>
+</div>
+<div class="tweetbox" id="tweetzone">
+<div class="h">@elpresidentegame</div>
+<p id="tweet"></p>
+<div class="reply" id="reply"></div>
+</div>
+<footer>© Master_Iota_Vsn — Prototipo de videojuego satírico.<br>Personaje ficticio, con fines exclusivamente humorísticos.</footer>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function round(n,d){const p=Math.pow(10,d);return Math.round(n*p)/p;}
+let approval=54,wealth=2.4,risk=12,price=0.014,history=[0.010,0.011,0.012,0.013,0.014],day=1,streak=0,decCount=0;
+
+const decisions=[
+{text:"Sus generales proponen un ataque preventivo a un país rico en petróleo.",
+ a:{label:"Atacar",tag:"+fortuna +riesgo",fx:()=>{wealth+=0.9;risk+=10;approval+=Math.random()>0.5?3:-5;pump(1.08);degen();},
+    tweet:"No atacamos. Ofrecimos ayuda humanitaria no solicitada.",
+    reply:"Esto no es una guerra por el petróleo. Es una operación de estabilización energética."},
+ b:{label:"Negociar",tag:"+popularidad",fx:()=>{approval+=4;clean();},
+    tweet:"Elegí la paz. Nadie se enriquece con la paz, pero era la decisión correcta.",
+    reply:"No, no fue debilidad. Fue fuerza que decidió no mostrarse."}},
+{text:"Su yerno exige un asiento en el Consejo de Seguridad.",
+ a:{label:"Nombrarlo",tag:"+fortuna +riesgo",fx:()=>{wealth+=0.4;risk+=6;approval-=2;degen();},
+    tweet:"Mi yerno se une al Consejo de Seguridad. El nepotismo, cuando es mi familia, se llama talento.",
+    reply:"Esto no es un conflicto de intereses. Es una alineación de intereses."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=2;clean();},
+    tweet:"Rechacé nombrar a mi yerno. Está decepcionado, la democracia está a salvo.",
+    reply:"No, no está enojado conmigo. Bueno, no hemos hablado desde entonces, pero se le pasará."}},
+{text:"¿Debería lanzar $FREEDOM2, la secuela de su memecoin?",
+ a:{label:"Lanzarlo",tag:"+fortuna +riesgo",fx:()=>{wealth+=0.6;risk+=8;pump(1.2);degen();},
+    tweet:"$FREEDOM2 ya está activo. Compré antes que ustedes, pero sigue siendo 100% comunitario.",
+    reply:"El uso de información privilegiada no existe cuando yo hago las leyes."},
+ b:{label:"Ignorarlo",tag:"neutral",fx:()=>{clean();},
+    tweet:"Hoy no hay $FREEDOM2. Hasta yo resisto la tentación a veces.",
+    reply:"No, no es porque mi contador me suplicó que parara."}},
+{text:"Un periodista investiga sus campos de golf financiados por el Estado.",
+ a:{label:"Desacreditarlo",tag:"+riesgo -pop",fx:()=>{risk+=7;approval-=4;degen();},
+    tweet:"Este periodista inventa cosas. Mis campos de golf son infraestructura estratégica nacional.",
+    reply:"Sus fuentes son malas. Las mías, que no existen, son excelentes."},
+ b:{label:"Ignorarlo",tag:"neutral",fx:()=>{clean();},
+    tweet:"Un periodista escribió algo sobre mí. Tengo cosas más importantes, como mi swing.",
+    reply:"No comento rumores, salvo los que me convienen."}},
+{text:"Cumbre internacional: su intérprete está ausente.",
+ a:{label:"Improvisar",tag:"aleatorio",fx:()=>{approval+=Math.random()>0.5?5:-6;clean();},
+    tweet:"Improvisé un discurso entero sin intérprete. Todos aplaudieron, nadie entendió.",
+    reply:"No, no dije nada descabellado. Dije algo que la traducción aún no ha alcanzado."},
+ b:{label:"Posponer",tag:"-popularidad",fx:()=>{approval-=2;clean();},
+    tweet:"Pospuse la cumbre. La diplomacia requiere planificación, a diferencia de mis intérpretes.",
+    reply:"Posponer no es debilidad. Es estratégico, como todo lo que hago."}},
+{text:"Un cartel ofrece financiamiento discreto de campaña.",
+ a:{label:"Aceptar",tag:"+fortuna +riesgo",fx:()=>{wealth+=1.1;risk+=12;degen();},
+    tweet:"Mi campaña la financian 'empresarios locales'. Nunca pregunto de dónde viene el dinero.",
+    reply:"No es dinero sucio. Solo tuvo un recorrido complicado."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=3;clean();},
+    tweet:"Rechacé un financiamiento dudoso. Mi campaña será más pobre, mi conciencia más rica.",
+    reply:"No me arrepiento. Bueno, un poco, dado el precio de los mítines."}},
+{text:"¿Debería construir prisiones en Marte para descongestionar el sistema judicial?",
+ a:{label:"Construir",tag:"+fortuna +riesgo",fx:()=>{wealth+=0.7;risk+=6;approval+=Math.random()>0.5?4:-3;degen();},
+    tweet:"Prisiones en Marte anunciadas. El viaje es gratis, el regreso no.",
+    reply:"El costo es alto, sí. Pero la innovación penitenciaria no tiene precio."},
+ b:{label:"Cancelar",tag:"-fortuna",fx:()=>{wealth=Math.max(0,wealth-0.2);approval+=1;clean();},
+    tweet:"El proyecto de Marte queda cancelado. Mi sueño espacial esperará un mandato con más presupuesto.",
+    reply:"No, esto no es un fracaso. Es una pausa estratégica."}},
+{text:"¿Debería erigir una estatua dorada de usted mismo visible desde el espacio?",
+ a:{label:"Erigirla",tag:"+riesgo -fortuna",fx:()=>{wealth=Math.max(0,wealth-0.3);risk+=5;approval-=1;degen();},
+    tweet:"Estatua dorada inaugurada esta mañana. La modestia es para quienes no tienen mi historial.",
+    reply:"Esto no es un culto a la personalidad. Es urbanismo inspirador."},
+ b:{label:"Renunciar",tag:"+popularidad",fx:()=>{approval+=2;clean();},
+    tweet:"Al final no habrá estatua dorada. Mi ego sobrevivirá, y los fondos públicos también.",
+    reply:"No, no es falta de confianza. Es conciencia presupuestaria, por una vez."}},
+{text:"Un informe científico alarmante sobre el clima llega a su escritorio.",
+ a:{label:"Negarlo",tag:"-pop +riesgo",fx:()=>{approval-=3;risk+=5;degen();},
+    tweet:"Este informe climático está exagerado. Esta mañana hizo frío en mi casa, así que todo va bien.",
+    reply:"No, no ignoro la ciencia. Solo prefiero mi propia ciencia, más optimista."},
+ b:{label:"Actuar",tag:"+pop -fortuna",fx:()=>{approval+=3;wealth=Math.max(0,wealth-0.4);clean();},
+    tweet:"Anuncié un ambicioso plan climático. Mis amigos del petróleo están menos contentos de lo habitual.",
+    reply:"No, esto no es greenwashing. Es marketing ambiental sincero."}},
+{text:"Los resultados electorales le dan como perdedor por poco.",
+ a:{label:"Impugnar",tag:"+riesgo -pop",fx:()=>{risk+=9;approval-=3;degen();},
+    tweet:"Esta elección está amañada. Tengo pruebas. No las mostraré, pero existen.",
+    reply:"No, esto no es negación. Es una impugnación legítima y totalmente objetiva."},
+ b:{label:"Conceder",tag:"+popularidad",fx:()=>{approval+=5;clean();},
+    tweet:"Concedí la elección con clase. La democracia funciona, incluso en mi contra.",
+    reply:"No, no estoy amargado. Solo estoy... muy decepcionado del pueblo."}},
+{text:"Su ministro de finanzas propone un impuesto sobre la lluvia que cae en el territorio.",
+ a:{label:"Adoptarlo",tag:"+fortuna -pop",fx:()=>{wealth+=0.5;approval-=3;degen();},
+    tweet:"Nuevo impuesto a la lluvia aprobado. Si cae en su casa, es porque se beneficia de ella.",
+    reply:"Esto no es absurdo. Es fiscalidad innovadora sobre un recurso subexplotado."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=2;clean();},
+    tweet:"Rechacé cobrar impuesto a la lluvia. Hasta yo tengo límites, al parecer.",
+    reply:"No, no era una mala idea. Solo estaba adelantada a su tiempo."}},
+{text:"Los servicios de inteligencia proponen espiar las comunicaciones de todos los ciudadanos.",
+ a:{label:"Autorizarlo",tag:"+riesgo -pop",fx:()=>{risk+=8;approval-=2;degen();},
+    tweet:"Nuevo programa de seguridad nacional lanzado. Si no tiene nada que esconder, no tiene nada que temer.",
+    reply:"Esto no es vigilancia masiva. Es prevención proactiva generalizada."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=3;clean();},
+    tweet:"Rechacé el programa de vigilancia. La privacidad importa, al parecer.",
+    reply:"No, no es por principios. Es que el presupuesto estaba ajustado este trimestre."}},
+{text:"Un medio de comunicación critica su gestión de la crisis económica.",
+ a:{label:"Censurarlo",tag:"+riesgo -pop",fx:()=>{risk+=7;approval-=4;degen();},
+    tweet:"Retiré la licencia de ese medio. La libertad de prensa sigue siendo total, excepto para ellos.",
+    reply:"Esto no es censura. Es moderación editorial a escala nacional."},
+ b:{label:"Ignorarlo",tag:"neutral",fx:()=>{clean();},
+    tweet:"Un medio me critica. No tengo tiempo de leer, tengo una cumbre que improvisar.",
+    reply:"Nunca respondo a las críticas. Salvo por tuit interpuesto, obviamente."}},
+{text:"Un multimillonario extranjero propone comprar la nacionalidad para él y 200 allegados.",
+ a:{label:"Vender",tag:"+fortuna +riesgo",fx:()=>{wealth+=1.3;risk+=9;degen();},
+    tweet:"Nuevo programa de pasaportes dorados lanzado. La ciudadanía se merece, o se compra, según el precio.",
+    reply:"Esto no es corrupción. Es atractivo económico territorial."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=2;clean();},
+    tweet:"Rechacé vender pasaportes. La nacionalidad no está en venta, a diferencia de otras cosas.",
+    reply:"No, no es un remordimiento. Bueno, uno pequeño, dado el monto ofrecido."}},
+{text:"Su hija, de 24 años, quiere convertirse en embajadora en un país estratégico.",
+ a:{label:"Nombrarla",tag:"+fortuna +riesgo",fx:()=>{wealth+=0.3;risk+=5;approval-=2;degen();},
+    tweet:"Mi hija es nuestra nueva embajadora. Tiene un instinto diplomático innato, al parecer.",
+    reply:"Su experiencia diplomática es limitada, sí. Pero su apellido es excelente."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=2;clean();},
+    tweet:"Rechacé nombrar a mi hija embajadora. Las cenas familiares van a ser largas.",
+    reply:"No, no está enojada conmigo. Ahora nos comunicamos sobre todo por mensajes cortos."}},
+{text:"Surge una oportunidad minera si un país vecino cambia repentinamente de gobierno.",
+ a:{label:"Intervenir",tag:"+fortuna +riesgo",fx:()=>{wealth+=1.0;risk+=12;degen();},
+    tweet:"Apoyamos al pueblo vecino en su transición democrática espontánea y totalmente orgánica.",
+    reply:"Esto no es injerencia. Es asistencia humanitaria con intereses mineros, dicho sea de paso."},
+ b:{label:"No hacer nada",tag:"+popularidad",fx:()=>{approval+=2;clean();},
+    tweet:"Respetamos la soberanía de nuestros vecinos. Los minerales esperarán un poco.",
+    reply:"No, no es falta de ambición. Es respeto al derecho internacional, por una vez."}},
+{text:"Sus asesores proponen lanzar un canal de televisión oficial del gobierno.",
+ a:{label:"Lanzarlo",tag:"+riesgo -pop",fx:()=>{risk+=6;approval-=2;degen();},
+    tweet:"Nuevo canal nacional lanzado. Objetividad garantizada, excepto en temas que me involucran.",
+    reply:"Esto no es propaganda. Es información institucional con un punto de vista claro."},
+ b:{label:"Renunciar",tag:"+popularidad",fx:()=>{approval+=2;clean();},
+    tweet:"Al final no hay canal oficial. Los medios existentes ya me critican bastante.",
+    reply:"No, esto no es una admisión de debilidad. Es una decisión presupuestaria responsable."}},
+{text:"Una empresa de mercenarios propone reemplazar parte del ejército nacional.",
+ a:{label:"Aceptar",tag:"+fortuna +riesgo",fx:()=>{wealth+=0.8;risk+=10;degen();},
+    tweet:"Nuestra defensa nacional está ahora parcialmente privatizada. Eficiencia primero, transparencia después.",
+    reply:"Esto no es irresponsable. Es externalización estratégica de la seguridad."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=3;clean();},
+    tweet:"Rechacé privatizar el ejército. Algunas cosas no deberían estar en venta, al parecer.",
+    reply:"No, no es falta de visión. Es un exceso de principios, por una vez."}},
+{text:"Una empresa tecnológica ofrece una fortuna por los datos personales de todos los ciudadanos.",
+ a:{label:"Vender",tag:"+fortuna +riesgo",fx:()=>{wealth+=1.2;risk+=9;degen();},
+    tweet:"Acuerdo firmado con un socio tecnológico importante. Sus datos están en buenas manos, los míos sobre todo.",
+    reply:"Esto no es una violación de la privacidad. Es una alianza público-privada innovadora."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=2;clean();},
+    tweet:"Rechacé vender los datos de los ciudadanos. Hasta yo tengo un precio mínimo, y estaba por debajo.",
+    reply:"No, no es por convicción. Es porque la oferta era insultante."}},
+{text:"Su equipo propone anular la deuda nacional simplemente cambiando de moneda.",
+ a:{label:"Hacerlo",tag:"+fortuna +riesgo",fx:()=>{wealth+=0.6;risk+=8;degen();},
+    tweet:"Nueva moneda nacional anunciada. ¿La deuda en la moneda antigua? ¿Qué deuda?",
+    reply:"Esto no es un impago. Es un reinicio monetario creativo."},
+ b:{label:"Renunciar",tag:"+popularidad",fx:()=>{approval+=2;clean();},
+    tweet:"Al final no hay nueva moneda. Pagaremos la deuda a la antigua, dolorosamente.",
+    reply:"No, no es decepcionante. Es responsable, lo cual es casi igual de raro."}},
+{text:"Podría organizar una cumbre cripto exclusiva con un precio de entrada exorbitante.",
+ a:{label:"Organizarla",tag:"+fortuna +riesgo",fx:()=>{wealth+=0.7;risk+=6;pump(1.1);degen();},
+    tweet:"Cumbre $FREEDOM Summit anunciada. Entrada cara, contenido ligero, pero qué red de contactos.",
+    reply:"Esto no es vender acceso presidencial. Es networking premium."},
+ b:{label:"Cancelarla",tag:"neutral",fx:()=>{clean();},
+    tweet:"Cumbre cancelada. Prefiero guardarme mis contactos VIP, la verdad.",
+    reply:"No, no es falta de interés. Es exclusividad estratégica."}},
+{text:"Un líder extranjero le ofrece un avión privado de varios cientos de millones.",
+ a:{label:"Aceptar",tag:"+fortuna +riesgo",fx:()=>{wealth+=1.5;risk+=11;degen();},
+    tweet:"Acepté un generoso regalo de un amigo extranjero. Sin contraprestación, que yo sepa.",
+    reply:"Esto no es un soborno disfrazado. Es un gesto de amistad entre naciones, que vuela muy bien."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=3;clean();},
+    tweet:"Rechacé el avión. Mi jet actual me alcanza perfectamente, por desgracia para mí.",
+    reply:"No, no es un remordimiento. Bueno, un poco, viendo el cuero de los asientos que me mostraron."}},
+{text:"Su equipo de marketing propone vender NFT de su firma oficial.",
+ a:{label:"Lanzarlo",tag:"+fortuna +riesgo",fx:()=>{wealth+=0.5;risk+=5;pump(1.1);degen();},
+    tweet:"NFT de mi firma disponibles ahora. Edición limitada a 10.000 ejemplares, como toda rareza seria.",
+    reply:"Esto no es grotesco. Es innovación presidencial en arte digital."},
+ b:{label:"Rechazar",tag:"+popularidad",fx:()=>{approval+=1;clean();},
+    tweet:"Al final no hay NFT de mi firma. Hasta yo pensé que era demasiado, algo que nunca pasa.",
+    reply:"No, no es falta de audacia. Es un arranque pasajero de dignidad."}},
+{text:"Para generar revuelo, le proponen nombrar a su perro 'ministro de la Alegría nacional'.",
+ a:{label:"Nombrarlo",tag:"aleatorio",fx:()=>{approval+=Math.random()>0.5?4:-3;degen();},
+    tweet:"Mi perro es oficialmente ministro de la Alegría nacional. Su historial ya supera al de algunos colegas.",
+    reply:"No, esto no es falta de seriedad. Es comunicación política moderna."},
+ b:{label:"Rechazar",tag:"neutral",fx:()=>{clean();},
+    tweet:"Mi perro sigue siendo perro. Sin ministerio para él, de todas formas prefiere los paseos.",
+    reply:"No, no es decepcionante. Es una decisión institucional reflexiva, por una vez."}},
+{text:"Su gran muro fronterizo podría convertirse en una atracción turística de pago.",
+ a:{label:"Monetizarlo",tag:"+fortuna -pop",fx:()=>{wealth+=0.6;approval-=2;degen();},
+    tweet:"El muro ahora es una atracción turística oficial. Entradas a la venta, vistas impresionantes, simbolismo incluido.",
+    reply:"Esto no es cínico. Es diversificación presupuestaria creativa."},
+ b:{label:"Dejarlo tal cual",tag:"neutral",fx:()=>{clean();},
+    tweet:"El muro sigue siendo un muro, sin taquilla. Algunas cosas no deberían monetizarse, al parecer.",
+    reply:"No, no es falta de ambición comercial. Es un arranque de buen gusto."}}
+];
+
+function degen(){streak++;updateStreak();}
+function clean(){streak=0;updateStreak();}
+function updateStreak(){
+  const b=$('streakbadge');
+  if(streak>=2){b.style.display='inline-flex';$('streakval').textContent=streak;}
+  else{b.style.display='none';}
+}
+function pump(mult){const p=round(price*(mult+Math.random()*0.1),4);history.push(p);if(history.length>8)history.shift();price=p;}
+function flash(id,ok){const el=$(id);el.style.background=ok?'#173427':'#3a1a18';setTimeout(()=>{el.style.background='var(--card)';},450);}
+function showTweet(o){$('tweet').textContent=o.tweet;$('reply').textContent=o.reply;$('tweetzone').style.opacity='1';}
+function refresh(){
+  $('day').textContent=day;
+  $('approval').textContent=round(Math.max(0,Math.min(100,approval)),0)+'%';
+  $('wealth').textContent='$'+round(wealth,1)+'M';
+  $('risk').textContent=round(Math.max(0,Math.min(100,risk)),0)+'%';
+  $('risk').style.color=risk>60?'var(--bad)':(risk>30?'var(--accent)':'var(--text)');
+  $('coinprice').textContent='$'+round(price,3);
+  const change=round(((price-history[0])/history[0])*100,0);
+  const cc=$('coinchange');
+  cc.textContent=(change>=0?'+':'')+change+'%';
+  cc.style.color=change>=0?'var(--good)':'var(--bad)';
+  drawChart();
+}
+function drawChart(){
+  const c=$('chart'),ctx=c.getContext('2d'),w=c.clientWidth,h=c.clientHeight;
+  c.width=w*devicePixelRatio;c.height=h*devicePixelRatio;ctx.scale(devicePixelRatio,devicePixelRatio);ctx.clearRect(0,0,w,h);
+  const min=Math.min(...history),max=Math.max(...history,min+0.001);
+  ctx.beginPath();
+  history.forEach((v,i)=>{const x=(i/(history.length-1))*w,y=h-((v-min)/(max-min))*h*0.8-h*0.1;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.strokeStyle=history[history.length-1]>=history[0]?'#5dcaa5':'#e0716c';ctx.lineWidth=2;ctx.stroke();
+}
+function loadCard(){
+  const d=decisions[Math.floor(Math.random()*decisions.length)];
+  $('detext').textContent=d.text;
+  const a=$('choiceA'),b=$('choiceB');
+  a.innerHTML=d.a.label+' <span>'+d.a.tag+'</span>';
+  b.innerHTML=d.b.label+' <span>'+d.b.tag+'</span>';
+  a.onclick=()=>choose(d.a);
+  b.onclick=()=>choose(d.b);
+}
+function choose(opt){
+  const card=$('deccard');
+  card.style.transform='translateX(-16px)';card.style.opacity='0';
+  const before={approval,wealth,risk};
+  opt.fx();
+  flash('card-approval',approval>=before.approval);
+  if(wealth>before.wealth)flash('card-wealth',true);
+  if(risk>before.risk)flash('card-risk',false);
+  showTweet(opt);
+  day++;decCount=Math.min(25,decCount+1);$('decnum').textContent=decCount;
+  setTimeout(()=>{
+    loadCard();
+    card.style.transform='translateX(16px)';card.style.opacity='0';
+    requestAnimationFrame(()=>{card.style.transform='translateX(0)';card.style.opacity='1';});
+    refresh();
+  },260);
+}
+loadCard();refresh();
+</script>
+</body>
+</html>

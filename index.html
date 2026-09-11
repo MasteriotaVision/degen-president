@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Degen President</title>
+<style>
+:root{--bg:#111214;--card:#1b1c1f;--card2:#232427;--text:#f2f2f0;--muted:#9a9a94;--accent:#e0c34a;--good:#5dcaa5;--bad:#e0716c;--border:#33343a;}
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0;}
+.wrap{max-width:460px;margin:0 auto;padding:24px 20px 40px;}
+.langbar{display:flex;justify-content:center;gap:8px;margin-bottom:24px;}
+.langbar button{font-size:12px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:5px 14px;border-radius:999px;cursor:pointer;font-family:inherit;}
+.langbar button.active{color:var(--bg);background:var(--accent);border-color:var(--accent);font-weight:600;}
+.hero{text-align:center;margin-bottom:28px;}
+.avatar{width:76px;height:76px;border-radius:50%;background:#f0997b;position:relative;margin:0 auto 16px;}
+.avatar::before{content:"";position:absolute;top:-14px;left:-8px;right:-8px;height:34px;background:#fac775;border-radius:50% 50% 0 0;}
+.avatar::after{content:"";position:absolute;top:30px;left:22px;width:8px;height:8px;background:#2c2c2a;border-radius:50%;box-shadow:24px 0 0 #2c2c2a;}
+h1{font-size:26px;font-weight:700;margin:0 0 8px;letter-spacing:0.5px;}
+.tagline{font-size:14px;color:var(--muted);line-height:1.6;margin:0 0 4px;}
+.disclaimer{font-size:11px;color:var(--muted);opacity:0.7;margin-top:10px;line-height:1.5;}
+.features{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0;}
+.feature{background:var(--card);border-radius:12px;padding:14px;text-align:center;}
+.feature .emoji{font-size:22px;margin-bottom:6px;}
+.feature .t{font-size:12px;font-weight:600;margin-bottom:2px;}
+.feature .d{font-size:11px;color:var(--muted);line-height:1.4;}
+.playbox{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;margin-bottom:20px;}
+.playbox p{font-size:13px;color:var(--muted);margin:0 0 14px;}
+.playbtn{display:block;width:100%;background:var(--accent);color:var(--bg);border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit;}
+.playbtn:active{opacity:0.85;}
+.stats-preview{display:flex;justify-content:center;gap:16px;margin-bottom:24px;}
+.stats-preview div{text-align:center;}
+.stats-preview .n{font-size:16px;font-weight:700;color:var(--accent);}
+.stats-preview .l{font-size:10px;color:var(--muted);}
+footer{text-align:center;font-size:10px;color:var(--muted);margin-top:16px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="langbar">
+<button data-lang="fr" class="active">FR</button>
+<button data-lang="en">EN</button>
+<button data-lang="es">ES</button>
+</div>
+
+<div class="hero">
+<div class="avatar"></div>
+<h1 id="title">THE DEGEN PRESIDENT</h1>
+<p class="tagline" id="tagline">Gérez un président fictif. Corruption, memecoins, mégalomanie.</p>
+</div>
+
+<div class="stats-preview">
+<div><div class="n">25</div><div class="l" id="s1">décisions</div></div>
+<div><div class="n">3</div><div class="l" id="s2">langues</div></div>
+<div><div class="n">∞</div><div class="l" id="s3">rejouabilité</div></div>
+</div>
+
+<div class="features">
+<div class="feature"><div class="emoji">🏛️</div><div class="t" id="f1t">Pouvoir</div><div class="d" id="f1d">Décisions présidentielles absurdes</div></div>
+<div class="feature"><div class="emoji">🚀</div><div class="t" id="f2t">Memecoin</div><div class="d" id="f2d">Tweetez, pumpez, dumpez</div></div>
+<div class="feature"><div class="emoji">👨‍👩‍👧</div><div class="t" id="f3t">Népotisme</div><div class="d" id="f3d">Placez toute la famille</div></div>
+<div class="feature"><div class="emoji">📰</div><div class="t" id="f4t">Mauvaise foi</div><div class="d" id="f4d">Une réponse pour chaque scandale</div></div>
+</div>
+
+<div class="playbox">
+<p id="playtext">Choisissez votre langue et lancez la partie.</p>
+<a href="index_fr.html" class="playbtn" id="playbtn">JOUER MAINTENANT</a>
+</div>
+
+<p class="disclaimer" id="disclaimer">Personnage 100% fictif. Satire politique et vidéoludique. Ne représente aucune personne réelle, aucun conseil, aucune réalité.</p>
+</div>
+<footer>© Master_Iota_Vsn — Prototype de jeu vidéo satirique.</footer>
+
+<script>
+const T={
+ fr:{title:"THE DEGEN PRESIDENT",tagline:"Gérez un président fictif. Corruption, memecoins, mégalomanie.",
+     s1:"décisions",s2:"langues",s3:"rejouabilité",
+     f1t:"Pouvoir",f1d:"Décisions présidentielles absurdes",
+     f2t:"Memecoin",f2d:"Tweetez, pumpez, dumpez",
+     f3t:"Népotisme",f3d:"Placez toute la famille",
+     f4t:"Mauvaise foi",f4d:"Une réponse pour chaque scandale",
+     playtext:"Choisissez votre langue et lancez la partie.",playbtn:"JOUER MAINTENANT",link:"index_fr.html",
+     disclaimer:"Personnage 100% fictif. Satire politique et vidéoludique. Ne représente aucune personne réelle, aucun conseil, aucune réalité."},
+ en:{title:"THE DEGEN PRESIDENT",tagline:"Run a fictional president. Corruption, memecoins, megalomania.",
+     s1:"decisions",s2:"languages",s3:"replayability",
+     f1t:"Power",f1d:"Absurd presidential decisions",
+     f2t:"Memecoin",f2d:"Tweet it, pump it, dump it",
+     f3t:"Nepotism",f3d:"Place your whole family",
+     f4t:"Bad faith",f4d:"A comeback for every scandal",
+     playtext:"Pick your language and start playing.",playbtn:"PLAY NOW",link:"index_en.html",
+     disclaimer:"100% fictional character. Political and video game satire. Does not represent any real person, no advice, no reality."},
+ es:{title:"THE DEGEN PRESIDENT",tagline:"Gestiona a un presidente ficticio. Corrupción, memecoins, megalomanía.",
+     s1:"decisiones",s2:"idiomas",s3:"rejugabilidad",
+     f1t:"Poder",f1d:"Decisiones presidenciales absurdas",
+     f2t:"Memecoin",f2d:"Tuitea, infla, vende",
+     f3t:"Nepotismo",f3d:"Coloca a toda tu familia",
+     f4t:"Mala fe",f4d:"Una respuesta para cada escándalo",
+     playtext:"Elige tu idioma y comienza a jugar.",playbtn:"JUGAR AHORA",link:"index_es.html",
+     disclaimer:"Personaje 100% ficticio. Sátira política y de videojuegos. No representa a ninguna persona real, ningún consejo, ninguna realidad."}
+};
+function setLang(l){
+  const d=T[l];
+  document.getElementById('title').textContent=d.title;
+  document.getElementById('tagline').textContent=d.tagline;
+  document.getElementById('s1').textContent=d.s1;
+  document.getElementById('s2').textContent=d.s2;
+  document.getElementById('s3').textContent=d.s3;
+  document.getElementById('f1t').textContent=d.f1t;document.getElementById('f1d').textContent=d.f1d;
+  document.getElementById('f2t').textContent=d.f2t;document.getElementById('f2d').textContent=d.f2d;
+  document.getElementById('f3t').textContent=d.f3t;document.getElementById('f3d').textContent=d.f3d;
+  document.getElementById('f4t').textContent=d.f4t;document.getElementById('f4d').textContent=d.f4d;
+  document.getElementById('playtext').textContent=d.playtext;
+  const btn=document.getElementById('playbtn');
+  btn.textContent=d.playbtn;btn.href=d.link;
+  document.getElementById('disclaimer').textContent=d.disclaimer;
+  document.querySelectorAll('.langbar button').forEach(b=>b.classList.toggle('active',b.dataset.lang===l));
+  document.documentElement.lang=l;
+}
+document.querySelectorAll('.langbar button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
+</script>
+</body>
+</html>
